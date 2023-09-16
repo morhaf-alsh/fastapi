@@ -1,0 +1,19 @@
+services:
+  # fastapi:
+  #   image: morhaf
+  #   ports:
+  #     - "8000:8000"
+  #   volumes:
+  #     - /home/morhaf/FastApi-Docker/:/app
+  #   depends_on:
+  #     - db
+  #   restart: always
+  
+  db:
+    image: mysql
+    environment:
+      - MYSQL_ROOT_PASSWORD=root
+      - MYSQL_DATABASE=api
+
+    ports:
+      - 3306:3306

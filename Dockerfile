@@ -8,6 +8,8 @@ VOLUME ./data ./data
 
 RUN pip install -r requirement.txt
 
+RUN pip install sqlalchemy
+
 CMD ["uvicorn", "hello:app", "--reload", "--host", "0.0.0.0"]
 
 EXPOSE 8000
