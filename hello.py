@@ -19,7 +19,7 @@ db_config = {
 conn = MySQLdb.connect(**db_config)
 
 cursor = conn.cursor()
-query = "CREATE TABLE IF NOT EXISTS emp( id int NOT NULL  ,name varchar(50),lname varchar(50), email varchar(50), position varchar(50), dept varchar(50),  PRIMARY KEY(id))"
+query = "CREATE TABLE IF NOT EXISTS emp( id int NOT NULL AUTO_INCREMENT ,name varchar(50),lname varchar(50), email varchar(50), position varchar(50), dept varchar(50),  PRIMARY KEY(id))"
 cursor.execute(query)
 conn.commit()
 class Employee(BaseModel):
@@ -30,32 +30,29 @@ class Employee(BaseModel):
     position: str
     dept: str
 
-def get_unique_code():
-    code = ''.join(random.choices(string.ascii_uppercase,k=8))
-    return code
 
 
-@app.post("/emp/", response_model=Item)
-def create_item(item: Item):
+@app.post("/emp/", response_model=Employee)
+def create_item(emp: Employee):
     cursor = conn.cursor()
-    query = "INSERT INTO items (name, description) VALUES (%s, %s)"
-    cursor.execute(query, (item.name, item.description))
+    query = "INSERT INTO emp (name, lname, email, position, dept) VALUES (%s, %s, %s, %s, %s)"
+    cursor.execute(query, (emp.name, emp.lname, emp.email, emp.position, emp.dept))
     conn.commit()
-    item.id = cursor.lastrowid
+    emp.id = cursor.lastrowid
     cursor.close()
-    return item
-
-@app.get("/get_emp")
-async def get_emp():
-    with open("data/emp.json", "r") as outfile:
-        emp = json.load(outfile)
     return emp
 
-@app.post("/modify_me")
-async def modify_me(request: Request):
-    data = await request.json()
-    data["code"] = get_unique_code()
-    with open("data/emp.json", "w") as outfile:
-        json.dump(data, outfile)
-    return HTMLResponse("<p>done</p>")
+# @app.get("/get_emp")
+# async def get_emp():
+#     with open("data/emp.json", "r") as outfile:
+#         emp = json.load(outfile)
+#     return emp
+
+# @app.post("/modify_me")
+# async def modify_me(request: Request):
+#     data = await request.json()
+#     data["code"] = get_unique_code()
+#     with open("data/emp.json", "w") as outfile:
+#         json.dump(data, outfile)
+#     return HTMLResponse("<p>done</p>")
     
