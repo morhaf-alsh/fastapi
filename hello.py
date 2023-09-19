@@ -19,7 +19,7 @@ db_config = {
 conn = MySQLdb.connect(**db_config)
 
 cursor = conn.cursor()
-query = "CREATE TABLE IF NOT EXISTS emp( id int NOT NULL AUTO_INCREMENT ,name varchar(50),lname varchar(50), email varchar(50), position varchar(50), dept varchar(50),  PRIMARY KEY(id))"
+query = "CREATE TABLE IF NOT EXISTS emp( id int AUTO_INCREMENT ,name varchar(50),lname varchar(50), email varchar(50), position varchar(50), dept varchar(50),  PRIMARY KEY(id))"
 cursor.execute(query)
 conn.commit()
 class Employee(BaseModel):
