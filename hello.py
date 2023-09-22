@@ -1,3 +1,4 @@
+import uvicorn
 import json
 import random, string
 from fastapi import FastAPI, Request, Form,Body
@@ -5,9 +6,10 @@ from fastapi.responses import HTMLResponse
 from fastapi.templating import Jinja2Templates
 from pydantic import BaseModel
 import MySQLdb
+import os
+from typing import Optional
 
 app = FastAPI()
-templates = Jinja2Templates(directory="templates")
 
 db_config = {
     'host': '127.0.0.1',
@@ -23,17 +25,18 @@ query = "CREATE TABLE IF NOT EXISTS emp( id int AUTO_INCREMENT ,name varchar(50)
 cursor.execute(query)
 conn.commit()
 class Employee(BaseModel):
-    id: int
+    id: Optional[int] = None
     name: str
     lname: str
     email: str
     position: str
     dept: str
+    lists: Optional[list] = None
 
 
 
 @app.post("/emp/", response_model=Employee)
-def create_item(emp: Employee):
+def create_emp(emp: Employee):
     cursor = conn.cursor()
     query = "INSERT INTO emp (name, lname, email, position, dept) VALUES (%s, %s, %s, %s, %s)"
     cursor.execute(query, (emp.name, emp.lname, emp.email, emp.position, emp.dept))
@@ -42,17 +45,46 @@ def create_item(emp: Employee):
     cursor.close()
     return emp
 
-# @app.get("/get_emp")
-# async def get_emp():
-#     with open("data/emp.json", "r") as outfile:
-#         emp = json.load(outfile)
-#     return emp
+@app.get("/emp/list/")
+def list_emps():
+    cursor = conn.cursor()
+    query = "SELECT * FROM emp"
+    cursor.execute(query)
+    emps = cursor.fetchall()
+    print(emps)
+    emps_all =[]
+    for row in emps:
+        item = {}
+        item["id"] = row[0]
+        item["name"] = row[1]
+        item["lname"] = row[2]
+        item["email"] = row[3]
+        item["position"] = row[4]
+        item["dept"] = row[5]
+        emps_all.append(item)
+    cursor.close()
+    return emps_all
 
-# @app.post("/modify_me")
-# async def modify_me(request: Request):
-#     data = await request.json()
-#     data["code"] = get_unique_code()
-#     with open("data/emp.json", "w") as outfile:
-#         json.dump(data, outfile)
-#     return HTMLResponse("<p>done</p>")
-    
+@app.delete("/emp/{emp_id}")
+def delete_emp(emp_id: int):
+    cursor = conn.cursor()
+    query = "DELETE FROM emp WHERE id=%s"
+    cursor.execute(query, (emp_id,))
+    conn.commit()
+    cursor.close()
+    return {"id": emp_id}
+
+@app.put("/emp/{emp_id}", response_model=Employee)
+def modify_item(emp_id: int, emp: Employee):
+    cursor = conn.cursor()
+    query = "UPDATE emp SET name=%s, lname=%s, email=%s, position=%s, dept=%s WHERE id=%s"
+    cursor.execute(query, (emp.name, emp.lname, emp.email, emp.position, emp.dept, emp_id))
+    conn.commit()
+    cursor.close()
+    emp.id = emp_id 
+    return emp
+
+
+
+if __name__ == '__main__':
+    uvicorn.run("hello:app", port=8000, host="0.0.0.0")
