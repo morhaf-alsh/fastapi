@@ -12,12 +12,14 @@ from typing import Optional
 app = FastAPI()
 
 db_config = {
-    'host': '127.0.0.1',
-    'port': 3306,
-    'user': 'root',
-    'passwd': 'root',
-    'db': 'api',
+    'host': os.environ.get('DB_HOST'),
+    'port': int(os.environ.get('DB_PORT')),
+    'user': os.environ.get('DB_USER'),
+    'passwd': os.environ.get('DB_PASSWD'),
+    'db': os.environ.get('DB_NAME'),
 }
+
+
 conn = MySQLdb.connect(**db_config)
 
 cursor = conn.cursor()
